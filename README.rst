@@ -1,7 +1,7 @@
 Watson-Serialize
 ==============
 
-Process and route HTTP Request messages.
+Serialize objects and classes for use in REST APIs.
 
 For full documentation please see `Read The
 Docs <http://watson-serialize.readthedocs.org/>`__.
