@@ -36,15 +36,15 @@ class Instance(Base):
 
         .. code-block: python
 
-        class SomeClass(object):
+            class SomeClass(object):
 
-            class Meta(serializers.Instance):
-                attributes = ('id',)
+                class Meta(serializers.Instance):
+                    attributes = ('id',)
 
-            id = None
+                id = None
 
-        serializer = serializers.Collection(router)
-        serializer([SomeClass()])  # [{'id': 'value of id attribute'}]
+            serializer = serializers.Collection(router)
+            serializer([SomeClass()])  # [{'id': 'value of id attribute'}]
     """
 
     type = None

@@ -22,48 +22,48 @@ def serialize(func=None, router=None):
 
         .. code-block: python
 
-        class MyModel(models.Base):
+            class MyModel(models.Base):
 
-            class Meta(object):
-                attributes = ('id', 'name', 'related')
-                route = 'models'
+                class Meta(object):
+                    attributes = ('id', 'name', 'related')
+                    route = 'models'
 
-            id = ..
-            name = ..
-            related = []
+                id = ..
+                name = ..
+                related = []
 
-        class Controller(controllers.Rest):
-            @serialize
-            def GET(self):
-                return [
-                    MyModel(
-                        id=1,
-                        name='Test',
-                        related=[
-                            MyModel(id=5, name='Related model')
-                        ])
-                ]
+            class Controller(controllers.Rest):
+                @serialize
+                def GET(self):
+                    return [
+                        MyModel(
+                            id=1,
+                            name='Test',
+                            related=[
+                                MyModel(id=5, name='Related model')
+                            ])
+                    ]
 
         .. code-block:
 
-        # http://site.url/models?include=id,name
-        # Returns MyModel objects with attributes id, and name
+            # http://site.url/models?include=id,name
+            # Returns MyModel objects with attributes id, and name
 
-        # http://site.url/models?include=*
-        # Returns MyModel objects with all attributes in the Meta object
+            # http://site.url/models?include=*
+            # Returns MyModel objects with all attributes in the Meta object
 
-        # http://site.url/models?exclude=name
-        # Returns MyModel objects with all attributes in the Meta object excluding
-        # the name attribute
+            # http://site.url/models?exclude=name
+            # Returns MyModel objects with all attributes in the Meta object excluding
+            # the name attribute
 
-        # http://site.url/models?expand=related
-        # Returns MyModel objects with all attributes in the Meta object and
-        # expand the attributes for the models in the 'related' attribute of MyModel
+            # http://site.url/models?expand=related
+            # Returns MyModel objects with all attributes in the Meta object and
+            # expand the attributes for the models in the 'related' attribute of MyModel
 
-        # http://site.url/models?expand=related(name)
-        # Returns MyModel objects with all attributes in the Meta object and
-        # expand the models in the 'related' attribute of MyModel, showing
-        # their 'name' attribute
+            # http://site.url/models?expand=related(name)
+            # Returns MyModel objects with all attributes in the Meta object and
+            # expand the models in the 'related' attribute of MyModel, showing
+            # their 'name' attribute
     """
     def decorator(func):
         def wrapper(self, *args, **kwargs):

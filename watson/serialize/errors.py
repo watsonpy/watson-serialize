@@ -6,14 +6,14 @@ class Base(RuntimeError):
 
         .. code-block: python
 
-        class MyRestError(errors.Base):
-            pass
+            class MyRestError(errors.Base):
+                pass
 
-        # somewhere in your code...
+            # somewhere in your code...
 
-        raise MyRestError(code=01, message='You broke it', developer_message='Invalid index supplied')
+            raise MyRestError(code=01, message='You broke it', developer_message='Invalid index supplied')
 
-        # {'code': '01406', message='You broke it', 'developer_message': 'Invalid index supplied'}
+            # {'code': '01406', message='You broke it', 'developer_message': 'Invalid index supplied'}
     """
 
     class Meta(object):
@@ -41,4 +41,6 @@ class Base(RuntimeError):
         self.status_code = status_code
         self.code = '{}{}'.format(status_code, code)
         self.message = message
-        self.developer_message = developer_message or message
+        self.developer_message = '{}: {}'.format(
+            self.__class__.__name__,
+            developer_message or message)
