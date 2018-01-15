@@ -1,0 +1,17 @@
+language: python
+python:
+  - 3.4
+  - 3.5
+  - 3.6
+install:
+  - pip install -r requirements-test.txt
+  - pip install -r requirements.txt
+before_script:
+  - mkdir -p tests/_coverage
+script:
+  - py.test tests/ --cov watson --cov-report term-missing
+after_success:
+  - coveralls --verbose
+notifications:
+  slack:
+    secure: Iw6+kPvWePQmsRiEV6XNHMBbJezw/mrGpLMJK4JK2LCEIzVr5rGLNGCYXnD0eqkeDjsNZpVEqpjCzZL0xC2HtNvIT+/HpLrkkh64ccRC0f/yIid4pnsMkVkZ+L08TW5DC9dQVPYk51fMhlQhRpVRExSX8hTG0dW601ZxCWLu7lU=
