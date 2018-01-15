@@ -1,2 +1,3 @@
 sphinxcontrib-napoleon
-watson-db
+watson-db >= 1.0.0
+watson-common >= 1.0.0
