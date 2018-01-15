@@ -182,6 +182,40 @@ simple `serialize` decorator available to get you up and running quickly.
 When the controllers `GET` action is called, the response will be serialized,
 and then JSON encoded for the end user.
 
+Raising exceptions for your users
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When you raise an exception during API access, you'll want to make sure that it
+is meaningful and useful for your end users.
+
+.. code-block:: python
+
+    from watson.serialize import errors
+
+    class MyRestError(errors.Base):
+        pass
+
+    # somewhere within your controller
+    raise MyRestError(
+        code=00,
+        status_code=400,
+        message='Something broke',
+        developer_message='Invalid index supplied')
+
+When the response is sent to the end user, they will receive a 400 error, with
+the following result:
+
+.. code-block:: javascript
+
+    {
+        code: 40000,
+        message: 'Something broke',
+        developer_message: 'Invalid index supplied'
+    }
+
+As you can see, code and status_code get combined to give you a unique code
+specifically related to that error.
+
 How an end user will interact with your API
 -------------------------------------------
 
