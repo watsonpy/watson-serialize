@@ -19,7 +19,7 @@ Installation
 Dependencies
 ------------
 
--  watson-common
+-  watson-db
 
 .. |Build Status| image:: https://img.shields.io/travis/watsonpy/watson-serialize.svg?maxAge=2592000
    :target: https://travis-ci.org/watsonpy/watson-serialize
