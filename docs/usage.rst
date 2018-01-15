@@ -22,7 +22,7 @@ and whether or not null values will be exposed.
 
 Let's start by creating the definition of the model:
 
-.. tip::
+.. note::
     This document assumes that you're also using watson-db for creating your models
     although any ORM that you use will work, so long as the models are defined declaratively.
 
@@ -64,6 +64,10 @@ to be serialized. You can set these in the following way:
 .. code-block:: python
 
     attributes = ('attribute1', 'attribute2')
+
+.. note::
+    The first attribute in the list of attributes will be treated as the 'identifying'
+    attribute, which is used when generating the metadata for the object.
 
 Complex types
 ^^^^^^^^^^^^^
@@ -156,7 +160,7 @@ Of course, you could code all of what you've read above into your Watson
 controllers by using the lower level API, but that's why we have a
 simple `serialize` decorator available to get you up and running quickly.
 
-.. tip::
+.. note::
     The following code assumes you're using watson-db and the associated
     repositories and Pagination. If you're not, just look at the decorators
     being used.
