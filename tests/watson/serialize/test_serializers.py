@@ -10,6 +10,10 @@ class TestInstance(object):
         self.router = support.sample_router()
         self.serializer = serializers.Instance(self.router)
 
+    def test_serialize_none(self):
+        output = self.serializer(None)
+        assert not output
+
     def test_serialize_list(self):
         model = support.generate_model(id=1, name='test')
         objs = [model]

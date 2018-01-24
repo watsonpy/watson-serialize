@@ -128,6 +128,8 @@ class Instance(Base):
 
     def _serialize_instance(
             self, instance, expand=None, include=None, exclude=None):
+        if not instance:
+            return None
         self._assign_meta(instance)
         obj = {}
         expands = self._generate_expands(expand)
@@ -166,11 +168,11 @@ class Instance(Base):
         return instance
 
     def _attach_collection_meta(self, obj, instance):
+        if not self.expose_meta:
+            return obj
         obj = {
             'items': obj
         }
-        if not self.expose_meta:
-            return obj
         is_paginator = isinstance(instance, utils.Pagination)
         pages = ''
         page = 1
