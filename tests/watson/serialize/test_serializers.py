@@ -135,3 +135,8 @@ class TestInstance(object):
         paginator = utils.Pagination(repository.query)
         output = self.serializer(paginator)
         assert output['meta']['href'] == '/models?page=1'
+
+    def test_camelcased_names(self):
+        model = support.generate_model(id=1)
+        output = self.serializer(model, include=['enumValue'])
+        assert 'enum_value' in output

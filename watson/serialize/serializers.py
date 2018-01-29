@@ -2,8 +2,11 @@
 import abc
 import collections
 import re
-from watson.common import imports
+from watson.common import imports, strings
 from watson.db import utils
+
+# splits attribute(attr1,attr2),attribute2 by comma
+attribute_regex = r',(?![^()]*(?:\([^()]*\))?\))'
 
 
 class Base(metaclass=abc.ABCMeta):
@@ -83,6 +86,13 @@ class Instance(Base):
             if self.include_null is None:
                 self.include_null = getattr(instance.Meta, 'include_null', False)
 
+    def _cleaned_attribute_names(self, accepted, requested, override):
+        override = set([
+            strings.snakecase(attr) for attr in set(
+                override).difference(accepted)
+        ])
+        return accepted.union(requested.intersection(override))
+
     def _generate_attributes(self, expand=None, include=None, exclude=None):
         if include and include[0] == '*':
             self.include_null = True
@@ -93,7 +103,8 @@ class Instance(Base):
         else:
             attributes = set([self.identifier])
         if include:
-            attributes = attributes.union(_attributes.intersection(include))
+            attributes = self._cleaned_attribute_names(
+                attributes, _attributes, include)
         if exclude:
             try:
                 exclude.remove(self.identifier)
@@ -101,7 +112,8 @@ class Instance(Base):
                 pass
             attributes = attributes - set(exclude)
         if expand:
-            attributes = attributes.union(_attributes.intersection(expand))
+            attributes = self._cleaned_attribute_names(
+                attributes, _attributes, expand)
         return attributes
 
     def _generate_expands(self, expands=None):
@@ -111,7 +123,9 @@ class Instance(Base):
             if not m:
                 output[expand] = None
                 continue
-            output[m.group(1)] = m.group(2).split(',')
+            output[strings.snakecase(m.group(1))] = [
+                v.strip() for v in re.split(attribute_regex, m.group(2))
+            ]
         return output
 
     def _serialize_collection(
@@ -125,6 +139,16 @@ class Instance(Base):
                 value, expand=expand, include=include, exclude=exclude)
             output.append(value)
         return output
+
+    def _includes_expands_from_expand(self, expand):
+        expands = []
+        includes = []
+        for expand_ in expand or []:
+            if '(' in expand_:
+                expands.append(expand_)
+            else:
+                includes.append(expand_)
+        return includes, expands
 
     def _serialize_instance(
             self, instance, expand=None, include=None, exclude=None):
@@ -140,21 +164,24 @@ class Instance(Base):
             if value or self.include_null:
                 if isinstance(value, list):
                     serializer = Instance(self.router)
-                    sub_includes = expands.get(attr)
+                    sub_includes, sub_expands = self._includes_expands_from_expand(
+                        expands.get(attr))
                     if sub_includes:
                         serializer.expand = True
                     value = serializer(
                         value,
-                        include=sub_includes)
+                        include=sub_includes, expand=sub_expands)
                 elif self.strategies and attr in self.strategies:
                     value = self.strategies[attr](value)
                 elif hasattr(value, 'Meta'):
                     serializer = Instance.from_meta(
                         value.Meta, router=self.router)
-                    sub_include = expands.get(attr)
-                    if not sub_include:
-                        sub_include = [serializer.identifier]
-                    value = serializer(value, include=sub_include)
+                    sub_includes, sub_expands = self._includes_expands_from_expand(
+                        expands.get(attr))
+                    if not sub_includes:
+                        sub_includes = [serializer.identifier]
+                    value = serializer(
+                        value, include=sub_includes, expand=sub_expands)
                 obj[attr] = value
         return self._attach_object_meta(obj)
 

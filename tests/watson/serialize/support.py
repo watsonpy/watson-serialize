@@ -25,6 +25,7 @@ class Model(BaseModel):
             'id',
             'name',
             'instances',
+            'instance',
             'enum_value'
         )
         strategies = {
@@ -35,6 +36,7 @@ class Model(BaseModel):
     id = Column(Integer, primary_key=True)
     name = None
     instances = None
+    instance = None
     enum_value = None
     protected_value = 'protected'
 
@@ -99,6 +101,16 @@ class Controller(object):
         repository = sample_repository()
         paginator = utils.Pagination(repository.query)
         return paginator
+
+    @serialize(router=sample_router())
+    def nested_object_action(self):
+        model = Model(id=1, name='Model1', enum_value=ModelEnum.test)
+        model.instance = SubModel(id=2, value='SubModel')
+        model2 = Model(id=3, name='Model2', instance=model)
+        model.instances = [
+            model2
+        ]
+        return model
 
     @serialize(router=sample_router())
     def error_action(self):
