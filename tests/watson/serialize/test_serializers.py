@@ -140,3 +140,19 @@ class TestInstance(object):
         model = support.generate_model(id=1)
         output = self.serializer(model, include=['enumValue'])
         assert 'enum_value' in output
+
+
+class TestAttributes(object):
+    def test_split_attributes(self):
+        string = 'attr'
+        assert serializers.split_attributes(string)[0] == 'attr'
+        string = 'attr(attr),attr2,attr3(attr4,attr5(attr6(attr7)),attr9),attr10'
+        split_string = serializers.split_attributes(string)
+        assert split_string[0] == 'attr(attr)'
+        assert split_string[1] == 'attr2'
+        assert split_string[2] == 'attr3(attr4,attr5(attr6(attr7)),attr9)'
+        string = 'attr(attr(attr3(attr4))),attr2,attr6'
+        split_string = serializers.split_attributes(string)
+        assert split_string[0] == 'attr(attr(attr3(attr4)))'
+        assert split_string[1] == 'attr2'
+        assert split_string[2] == 'attr6'

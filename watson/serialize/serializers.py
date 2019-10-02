@@ -5,8 +5,20 @@ import re
 from watson.common import imports, strings
 from watson.db import utils
 
-# splits attribute(attr1,attr2),attribute2 by comma
-attribute_regex = r',(?![^()]*(?:\([^()]*\))?\))'
+
+def split_attributes(string):
+    parts = []
+    nested_count = 0
+    offset = 0
+    for i, s in enumerate(string):
+        if s == '(':
+            nested_count = nested_count + 1
+        if s == ')':
+            nested_count = nested_count - 1
+        if not nested_count and s == ',' or len(string)-1 == i:
+            parts.append(string[offset: i+1].strip(','))
+            offset = i
+    return parts
 
 
 class Base(metaclass=abc.ABCMeta):
@@ -124,7 +136,7 @@ class Instance(Base):
                 output[expand] = None
                 continue
             output[strings.snakecase(m.group(1))] = [
-                v.strip() for v in re.split(attribute_regex, m.group(2))
+                v.strip() for v in split_attributes(m.group(2))
             ]
         return output
 
@@ -133,10 +145,11 @@ class Instance(Base):
         output = []
         for value in values:
             self._assign_meta(value)
-            if not self.expand:
-                include = [self.identifier]
-            value = self._serialize_instance(
-                value, expand=expand, include=include, exclude=exclude)
+            if hasattr(value, 'Meta'):
+                if not self.expand:
+                    include = [self.identifier]
+                value = self._serialize_instance(
+                    value, expand=expand, include=include, exclude=exclude)
             output.append(value)
         return output
 
@@ -161,8 +174,10 @@ class Instance(Base):
             if not hasattr(instance, attr):
                 continue
             value = getattr(instance, attr)
-            if value or self.include_null:
-                if isinstance(value, list):
+            if value is not None or self.include_null:
+                if self.strategies and attr in self.strategies:
+                    value = self.strategies[attr](value)
+                elif isinstance(value, list):
                     serializer = Instance(self.router)
                     sub_includes, sub_expands = self._includes_expands_from_expand(
                         expands.get(attr))
@@ -171,8 +186,6 @@ class Instance(Base):
                     value = serializer(
                         value,
                         include=sub_includes, expand=sub_expands)
-                elif self.strategies and attr in self.strategies:
-                    value = self.strategies[attr](value)
                 elif hasattr(value, 'Meta'):
                     serializer = Instance.from_meta(
                         value.Meta, router=self.router)

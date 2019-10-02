@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import re
 from watson.serialize import serializers, errors
 
 __all__ = ['serialize']
@@ -70,9 +69,7 @@ def serialize(func=None, router=None):
         def wrapper(self, *args, **kwargs):
             serializer_kwargs = {}
             for arg in ('expand', 'include', 'exclude'):
-                serializer_kwargs[arg] = re.split(
-                    serializers.attribute_regex,
-                    self.request.get[arg]) if arg in self.request.get else None
+                serializer_kwargs[arg] = serializers.split_attributes(self.request.get[arg]) if arg in self.request.get else None
             try:
                 response = func(self, **kwargs)
             except errors.Base as exc:
