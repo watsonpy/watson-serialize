@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import abc
-import collections
+from collections import abc as collections
 import re
 from watson.common import imports, strings
 from watson.db import utils
@@ -15,8 +15,8 @@ def split_attributes(string):
             nested_count = nested_count + 1
         if s == ')':
             nested_count = nested_count - 1
-        if not nested_count and s == ',' or len(string)-1 == i:
-            parts.append(string[offset: i+1].strip(','))
+        if not nested_count and s == ',' or len(string) - 1 == i:
+            parts.append(string[offset: i + 1].strip(','))
             offset = i
     return parts
 
@@ -131,7 +131,7 @@ class Instance(Base):
     def _generate_expands(self, expands=None):
         output = {}
         for expand in expands or []:
-            m = re.search('(\w+)\((.*)\)', expand)
+            m = re.search(r'(\w+)\((.*)\)', expand)
             if not m:
                 output[expand] = None
                 continue
